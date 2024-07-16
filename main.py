@@ -2,25 +2,68 @@ from fastapi import FastAPI, UploadFile, Form, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
+from fastapi_login import LoginManager
+from fastapi_login.exceptions import InvalidCredentialsException
 from typing import Annotated
 import sqlite3
 
 con = sqlite3.connect("db.db", check_same_thread=False)
 cur = con.cursor()
 
-cur.execute(f"""
-            CREATE TABLE IF NOT EXISTS items (
-                id INTEGER PRIMARY KEY,
-                title TEXT NOT NULL,
-                image BLOB,
-                price INTEGER NOT NULL,
-                description TEXT,
-                place TEXT NOT NULL,
-                insertAt INTEGER NOT NULL
-            );
-            """)
+# cur.execute(f"""
+#             CREATE TABLE IF NOT EXISTS items (
+#                 id INTEGER PRIMARY KEY,
+#                 title TEXT NOT NULL,
+#                 image BLOB,
+#                 price INTEGER NOT NULL,
+#                 description TEXT,
+#                 place TEXT NOT NULL,
+#                 insertAt INTEGER NOT NULL
+#             );
+#             """)
 
 app = FastAPI()
+
+SERCRET = "super-coding"
+manager = LoginManager(SERCRET, "/login")
+
+@manager.user_loader()
+def query_user(id):
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    user = cur.execute(f"""
+                       SELECT * from users WHERE id='{id}'
+                       """).fetchone()
+    return user
+
+@app.post("/login")
+def login(id:Annotated[str, Form()],
+          password:Annotated[str, Form()]):
+    user = query_user(id)
+    if not user:
+        raise InvalidCredentialsException
+    elif password != user["password"]:
+        raise InvalidCredentialsException
+    
+    access_token = manager.create_access_token(data={
+        "id":user["id"],
+        "name":user["name"],
+        "email":user["email"]
+    })
+    # 자동으로 status값에는 200을 리턴
+    return {"access_token":access_token}
+
+@app.post("/signup")
+def signup(id:Annotated[str, Form()],
+           password:Annotated[str, Form()],
+           name:Annotated[str, Form()],
+           email:Annotated[str, Form()]):
+    cur.execute(f"""
+                INSERT INTO users(id, name, email, password)
+                VALUES ('{id}', '{name}', '{email}', '{password}')
+                """)
+    con.commit()
+    return "200"
 
 @app.post("/items")
 async def create_item(image: UploadFile, 
@@ -58,16 +101,5 @@ async def get_image(item_id):
     
     return Response(content=bytes.fromhex(image_bytes), media_type = "image/*")
 
-@app.post("/signup")
-def signup(id:Annotated[str, Form()],
-           password:Annotated[str, Form()],
-           name:Annotated[str, Form()],
-           email:Annotated[str, Form()]):
-    cur.execute(f"""
-                INSERT INTO users(id, name, email, password)
-                VALUES ('{id}', '{name}', '{email}', '{password}')
-                """)
-    con.commit()
-    return "200"
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
