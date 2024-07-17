@@ -5,7 +5,10 @@ const calcTime = (timestamp) => {
   const hour = time.getHours();
   const minute = time.getMinutes();
   const second = time.getSeconds();
+  // const date = new Date().getDate();
+  // console.log(timestamp);
 
+  // if (data > 0) return `${date}일 전`;
   if (hour > 0) return `${hour}시간 전`;
   else if (minute > 0) return `${minute}분 전`;
   else if (second > 0) return `${second}초 전`;
@@ -55,7 +58,19 @@ const renderData = (data) => {
 };
 
 const fetchList = async () => {
-  const res = await fetch("/items");
+  const accessToken = window.localStorage.getItem("token");
+  const res = await fetch("/items", {
+    headers: {
+      Authorization: `BEarer ${accessToken}`,
+    },
+  });
+
+  if (res.status === 401) {
+    alert("로그인이 필요합니다!");
+    window.location.pathname = "/login.html";
+    return;
+  }
+
   const data = await res.json();
   renderData(data);
 };
