@@ -1,1 +1,1 @@
-# Welcome Carrot-Clone
+# Welcome to Carrot clone
