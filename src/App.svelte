@@ -1,9 +1,9 @@
 <script>
-  import Login from "./pages/login.svelte";
-  import Main from "./pages/main.svelte";
+  import Login from "./pages/Login.svelte";
+  import Main from "./pages/Main.svelte";
   import NotFound from "./pages/NotFound.svelte";
-  import Signup from "./pages/signup.svelte";
-  import Write from "./pages/write.svelte";
+  import Signup from "./pages/Signup.svelte";
+  import Write from "./pages/Write.svelte";
   import Router from "svelte-spa-router";
   import "./css/style.css";
 
