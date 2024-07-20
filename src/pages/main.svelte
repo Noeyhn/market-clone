@@ -66,7 +66,7 @@
       <div class="item-list__img"></div>
       <div class="item-list__info">
         <div class="item-list__info-title">{item.title}</div>
-        <div class="item-list__info-meta">{item.palce}</div>
+        <div class="item-list__info-meta">{item.place}</div>
         <div class="item-list__info-price">{item.price}</div>
         <div class="item-list__info-description">{item.description}</div>
       </div>
