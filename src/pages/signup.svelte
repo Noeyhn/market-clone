@@ -1,7 +1,7 @@
 <script
   src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"
 >
-  import Footer from "../components/Footer.svelte";
+  import Nav from "../components/Nav.svelte";
 </script>
 
 <form id="signup-form" action="/signup" method="POST">
@@ -32,4 +32,4 @@
   <div id="info"></div>
 </form>
 
-<Footer />
+<Nav location="signup" />
